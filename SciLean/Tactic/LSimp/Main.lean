@@ -488,7 +488,7 @@ partial def simpForall (e : Expr) : LSimpM Result := return { expr := e }
 
 @[inline] def _root_.Lean.Expr.app5? (e : Expr) (fName : Name) : Option (Expr × Expr × Expr × Expr × Expr) :=
   if e.isAppOfArity fName 5 then
-    some (e.appFn!.appFn!.appFn!.appArg!.appArg!, e.appFn!.appFn!.appFn!.appArg!, e.appFn!.appFn!.appArg!, e.appFn!.appArg!, e.appArg!)
+    some (e.appFn!.appFn!.appFn!.appFn!.appArg!, e.appFn!.appFn!.appFn!.appArg!, e.appFn!.appFn!.appArg!, e.appFn!.appArg!, e.appArg!)
   else
     none
 
