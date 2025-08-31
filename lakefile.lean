@@ -9,7 +9,7 @@ def linkArgs :=
     #["-L/opt/homebrew/opt/openblas/lib",
       "-L/usr/local/opt/openblas/lib", "-lblas"]
   else -- assuming linux
-    #["-L/usr/lib/x86_64-linux-gnu/", "-lblas", "-lm"]
+    #["-L/usr/lib/", "-lblas", "-lm"]
 def inclArgs :=
   if System.Platform.isWindows then
     #[]
@@ -17,7 +17,8 @@ def inclArgs :=
     #["-I/opt/homebrew/opt/openblas/include",
       "-I/usr/local/opt/openblas/include"]
   else -- assuming linux
-    #[]
+    #["-I/usr/include/openblas"]
+    --this is a hack, we probably should be asking pkg-config for the command line
 
 
 package scilean {
@@ -25,8 +26,8 @@ package scilean {
 }                               --
 
 
--- require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "v4.19.0"
-require leanblas from git "https://github.com/lecopivo/LeanBLAS" @ "v4.20.1"
+require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "v4.20.1"
+require leanblas from git "https://github.com/jkyang92/LeanBLAS" @ "master"
 
 
 -- FFI - build all `*.c` files in `./C` directory and package them into `libscileanc.a/so` library
@@ -36,7 +37,7 @@ target libscileanc pkg : FilePath := do
     if file.path.extension == some "c" then
       let oFile := pkg.buildDir / "c" / (file.fileName.stripSuffix ".c" ++ ".o")
       let srcJob ← inputTextFile file.path
-      let weakArgs := #["-I", (← getLeanIncludeDir).toString]
+      let weakArgs := #["-I", (← getLeanIncludeDir).toString] ++ inclArgs
       oFiles := oFiles.push (← buildO oFile srcJob weakArgs #["-fPIC", "-O3", "-DNDEBUG"] "gcc" getLeanTrace)
   let name := nameToStaticLib "scileanc"
   buildStaticLib (pkg.sharedLibDir / name) oFiles
